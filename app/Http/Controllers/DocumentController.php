@@ -28,7 +28,7 @@ class DocumentController extends Controller
             'folder_id' => $request->folder_id
         ]);
 
-        return response()->json(['message' => 'Document created successfully', 'document' => $document], 201);
+        return response()->json(['success' => true,'message' => 'Document created successfully', 'data' => $document], 201);
     }
 
     // Get all documents (Viewers, Editors, Admins)
@@ -43,7 +43,13 @@ class DocumentController extends Controller
             $query->where('title', 'LIKE', "%$search%")
                   ->orWhere('content', 'LIKE', "%$search%");
         }
-        return response()->json($query->get());
+       // return response()->json($query->get());
+        // Return structured JSON response
+    return response()->json([
+        'success' => true,
+        'message' => 'Document retrieved successfully',
+        'data' => $query->get()
+    ], 200);
     }
 
     public function show($id)
@@ -78,7 +84,7 @@ class DocumentController extends Controller
 
         $document->update($request->only(['title', 'content']));
 
-        return response()->json(['message' => 'Document updated successfully', 'document' => $document]);
+        return response()->json(['success' => true,'message' => 'Document updated successfully', 'data' => $document]);
     }
 
     // Delete a document (Admin only)
@@ -93,7 +99,7 @@ class DocumentController extends Controller
 
         $document->delete();
 
-        return response()->json(['message' => 'Document deleted successfully']);
+        return response()->json(['success' => true,'message' => 'Document deleted successfully']);
     }
 
     // Get all versions of a document
@@ -102,7 +108,6 @@ class DocumentController extends Controller
         $versions = DocumentVersion::where('document_id', $id)
             ->orderBy('created_at', 'desc')
             ->get();
-
-        return response()->json($versions);
+        return response()->json(['success' => true,'message' => 'Document Version retrieved successfully', 'data' => $versions]);
     }
 }

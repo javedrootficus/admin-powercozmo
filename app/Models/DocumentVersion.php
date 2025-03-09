@@ -8,7 +8,7 @@ class DocumentVersion extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['document_id', 'content', 'user_id'];
+    protected $fillable = ['document_id','title', 'content', 'user_id'];
 
     public function document()
     {

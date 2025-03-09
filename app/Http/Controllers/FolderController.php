@@ -9,20 +9,37 @@ class FolderController extends Controller
 {
     public function index()
     {
-        return response()->json(Folder::where('user_id', Auth::id())->get());
+  // Get folders for the authenticated user
+    $folders = Folder::where('user_id', Auth::id())->get();
+
+    // Return structured JSON response
+    return response()->json([
+        'success' => true,
+        'message' => 'Folders retrieved successfully',
+        'data' => $folders
+    ], 200);
     }
 
     public function create(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:255']);
-
-        $folder = Folder::create([
-            'user_id' => Auth::id(),
-            'name' => $request->name
+        // Validate the request
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
         ]);
 
-        return response()->json(['message' => 'Folder created', 'folder' => $folder], 201);
-    }
+        // Create the folder
+        $folder = Folder::create([
+            'user_id' => Auth::id(),
+            'name' => $validatedData['name']
+        ]);
+
+        // Return response with folder data
+        return response()->json([
+            'success' => true,
+            'message' => 'Folder created successfully',
+            'data' => $folder
+        ], 201);
+    } 
 
     public function rename(Request $request, Folder $folder)
     {
@@ -34,7 +51,12 @@ class FolderController extends Controller
 
         $folder->update(['name' => $request->name]);
 
-        return response()->json(['message' => 'Folder renamed', 'folder' => $folder]);
+         // Return response with folder data
+         return response()->json([
+            'success' => true,
+            'message' => 'Folder updated successfully',
+            'data' => $folder
+        ], 201);
     }
 
     public function delete(Folder $folder)
@@ -44,6 +66,8 @@ class FolderController extends Controller
         }
 
         $folder->delete();
-        return response()->json(['message' => 'Folder deleted']);
+        return response()->json(['success' => true,
+            'message' => 'Folder deleted successfully',
+            ]);
     }
 }

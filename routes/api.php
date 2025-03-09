@@ -25,3 +25,4 @@ Route::get('/documents', [DocumentController::class, 'index'])->middleware('auth
 Route::get('/documents/{id}', [DocumentController::class, 'show'])->middleware('auth:sanctum');
 Route::put('/documents/{id}', [DocumentController::class, 'update'])->middleware('auth:sanctum');
 Route::delete('/documents/{id}', [DocumentController::class, 'delete'])->middleware('auth:sanctum');
+Route::get('/documents/{id}/versions', [DocumentController::class, 'getVersions'])->middleware('auth:sanctum');

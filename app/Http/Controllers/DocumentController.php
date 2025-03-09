@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Document;
 use App\Models\Role;
+use App\Models\DocumentVersion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,10 +32,18 @@ class DocumentController extends Controller
     }
 
     // Get all documents (Viewers, Editors, Admins)
-    public function index()
+    public function index(Request $request)
     {
-        $documents = Document::all();
-        return response()->json($documents);
+        $query = Document::where('user_id', Auth::id());
+        if ($request->has('folder_id')) {
+            $query->where('folder_id', $request->folder_id);
+        }
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where('title', 'LIKE', "%$search%")
+                  ->orWhere('content', 'LIKE', "%$search%");
+        }
+        return response()->json($query->get());
     }
 
     public function show($id)
@@ -59,7 +68,15 @@ class DocumentController extends Controller
             'folder_id' => 'nullable|exists:folders,id'
         ]);
 
-        $document->update($request->only(['title', 'content', 'folder_id']));
+        // Save old version
+        DocumentVersion::create([
+            'document_id' => $document->id,
+            'user_id' => Auth::id(),
+            'content' => $document->content,
+        ]);
+
+
+        $document->update($request->only(['title', 'content']));
 
         return response()->json(['message' => 'Document updated successfully', 'document' => $document]);
     }
@@ -77,5 +94,15 @@ class DocumentController extends Controller
         $document->delete();
 
         return response()->json(['message' => 'Document deleted successfully']);
+    }
+
+    // Get all versions of a document
+    public function getVersions($id)
+    {
+        $versions = DocumentVersion::where('document_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($versions);
     }
 }
